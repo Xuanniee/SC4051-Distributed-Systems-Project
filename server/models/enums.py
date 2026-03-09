@@ -15,14 +15,12 @@ class Currency(Enum):
     EUR = 3
     GBP = 4
 
-
 class OpCode(Enum):
     OPEN_ACCOUNT = 1
     CLOSE_ACCOUNT = 2
     DEPOSIT = 3
     WITHDRAW = 4
     MONITOR_REGISTER = 5
-
 
 class StatusCode(Enum):
     SUCCESS = 0
@@ -31,7 +29,6 @@ class StatusCode(Enum):
     ACCOUNT_NOT_FOUND = 3
     INSUFFICIENT_FUNDS = 4
     INVALID_REQUEST = 5
-
 
 class MessageType(Enum):
     REQUEST = 1
