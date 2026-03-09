@@ -20,13 +20,16 @@ from models.messages import OpenAccountRequest, CloseAccountRequest, DepositWith
 
 def open_account(request: OpenAccountRequest) -> StandardResponse:
     if not request.name or request.name.strip() == "":
-        raise ValueError("Account holder name cannot be empty")
+        return StandardResponse(status=StatusCode.ERROR, message="Account holder name cannot be empty")
 
     if request.initial_balance < 0:
-        raise ValueError("Initial balance cannot be negative")
+        return StandardResponse(status=StatusCode.ERROR, message="Initial balance cannot be negative")
 
     if not isinstance(request.currency, Currency):
-        raise ValueError("Invalid currency type")
+        return StandardResponse(status=StatusCode.ERROR, message="Invalid currency type")
+
+    if len(request.password) != Account.PASSWORD_LENGTH:
+        return StandardResponse(status=StatusCode.ERROR, message="Password must be 8 characters long")
 
     account_number = generate_account_number()
 
