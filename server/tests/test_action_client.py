@@ -21,11 +21,15 @@ from protocols.codecs import (
     encode_deposit_withdraw_request,
     encode_open_account_request,
 )
+from protocols.invocation_codecs import encode_invocation_header
+from config.config import SERVER_ADDR, CLIENT_BUFFER_SIZE
 
-# Python Server Details to Reach it
-SERVER_ADDR = ("127.0.0.1", 2222)
-BUFFER_SIZE = 4096
-
+def build_packet(opcode: OpCode, client_id: str, request_id: int, body: bytes) -> bytes:
+    """
+    Encode the request header so server can identify if client request is a duplicate
+    """
+    header = encode_invocation_header(client_id, request_id)
+    return bytes([opcode.value]) + header + body
 
 def main() -> None:
     # Start listening on a socket
@@ -38,11 +42,15 @@ def main() -> None:
         currency=Currency.SGD,
         initial_balance=1000.0,
     )
-    packet = bytes([OpCode.OPEN_ACCOUNT.value]) + encode_open_account_request(open_req)
+    client_id = "action-client"
+    request_id = 1
+    header = encode_invocation_header(client_id, request_id)
+    # Since req is now in: [opcode][client_id][request_id][payload]
+    packet = bytes([OpCode.OPEN_ACCOUNT.value]) + header + encode_open_account_request(open_req)
     client_socket.sendto(packet, SERVER_ADDR)
 
     # Open Request might not always succeed 
-    data, _ = client_socket.recvfrom(BUFFER_SIZE)
+    data, _ = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
     try:
         open_res = decode_open_account_response(data)
         print("Open response:", open_res)
@@ -66,11 +74,15 @@ def main() -> None:
         currency=Currency.SGD,
         amount=200.0,
     )
-    packet = bytes([OpCode.DEPOSIT.value]) + encode_deposit_withdraw_request(deposit_req)
+    client_id = "action-client"
+    request_id = 2
+    header = encode_invocation_header(client_id, request_id)
+    # Since req is now in: [opcode][client_id][request_id][payload]
+    packet = bytes([OpCode.DEPOSIT.value]) + header + encode_deposit_withdraw_request(deposit_req)
     client_socket.sendto(packet, SERVER_ADDR)
 
     # See response, there should be 1,200 in acc now
-    data, _ = client_socket.recvfrom(BUFFER_SIZE)
+    data, _ = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
     try:
         deposit_res = decode_balance_response(data)
         print("Deposit req response:", deposit_res)
@@ -92,11 +104,15 @@ def main() -> None:
         currency=Currency.SGD,
         amount=150.0,
     )
-    packet = bytes([OpCode.WITHDRAW.value]) + encode_deposit_withdraw_request(withdraw_req)
+    client_id = "action-client"
+    request_id = 3
+    header = encode_invocation_header(client_id, request_id)
+    # Since req is now in: [opcode][client_id][request_id][payload]
+    packet = bytes([OpCode.WITHDRAW.value]) + header + encode_deposit_withdraw_request(withdraw_req)
     client_socket.sendto(packet, SERVER_ADDR)
 
     # See response, there should be 1,050 in acc now
-    data, _ = client_socket.recvfrom(BUFFER_SIZE)
+    data, _ = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
     try:
         withdraw_res = decode_balance_response(data)
         print("Withdraw req response:", withdraw_res)
@@ -115,11 +131,15 @@ def main() -> None:
         account_number=account_number,
         password="password",
     )
-    packet = bytes([OpCode.CLOSE_ACCOUNT.value]) + encode_close_account_request(close_req)
+    client_id = "action-client"
+    request_id = 4
+    header = encode_invocation_header(client_id, request_id)
+    # Since req is now in: [opcode][client_id][request_id][payload]
+    packet = bytes([OpCode.CLOSE_ACCOUNT.value]) + header + encode_close_account_request(close_req)
     client_socket.sendto(packet, SERVER_ADDR)
 
     # Ensure acc close
-    data, _ = client_socket.recvfrom(BUFFER_SIZE)
+    data, _ = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
     try:
         close_res = decode_standard_response(data)
         print("Close acc response:", close_res)

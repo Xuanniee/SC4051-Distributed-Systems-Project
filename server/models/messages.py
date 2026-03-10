@@ -64,3 +64,9 @@ class CallbackUpdate:
     currency: Currency
     balance: float
     note: str
+
+# Metadata about a Request to implement at most once semantics
+@dataclass(frozen=True)
+class RequestMeta:
+    client_id: str
+    request_id: int

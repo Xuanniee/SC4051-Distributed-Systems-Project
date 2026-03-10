@@ -13,10 +13,15 @@ from protocols.codecs import (
     decode_standard_response,
     encode_monitor_request,
 )
+from protocols.invocation_codecs import encode_invocation_header
+from config.config import SERVER_ADDR, CLIENT_BUFFER_SIZE
 
-# Python Server Details to Reach it
-SERVER_ADDR = ("127.0.0.1", 2222)
-BUFFER_SIZE = 4096
+def build_packet(opcode: OpCode, client_id: str, request_id: int, body: bytes) -> bytes:
+    """
+    Encode the request header so server can identify if client request is a duplicate
+    """
+    header = encode_invocation_header(client_id, request_id)
+    return bytes([opcode.value]) + header + body
 
 def main() -> None:
     # Create a socket to start listening to
@@ -25,21 +30,24 @@ def main() -> None:
     client_socket.bind(("127.0.0.1", 9001))
     
     # Send a monitor Request to the Backend server to monitor for 5 mins
-    request = MonitorRequest(duration_seconds=300)
-    payload = bytes([OpCode.MONITOR_REGISTER.value]) + encode_monitor_request(request)
+    request = MonitorRequest(duration_seconds=10)
+    client_id = "monitor-client"
+    request_id = 1
+    header = encode_invocation_header(client_id, request_id)
+    payload = bytes([OpCode.MONITOR_REGISTER.value]) + header + encode_monitor_request(request)
 
     # Send the request
     client_socket.sendto(payload, SERVER_ADDR)
 
     # Receive the monitor request registratin response first
-    data, addr = client_socket.recvfrom(BUFFER_SIZE)
+    data, addr = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
     response = decode_standard_response(data)
     print("Monitor registration response:", response)
 
     # Wait for all callback updates to be streamed
     print("Waiting for callback updates...\n")
     while True:
-        data, addr = client_socket.recvfrom(BUFFER_SIZE)
+        data, addr = client_socket.recvfrom(CLIENT_BUFFER_SIZE)
         update = decode_callback_update(data)
         print("Received callback from server:")
         print(update)
