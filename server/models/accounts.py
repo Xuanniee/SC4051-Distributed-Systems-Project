@@ -12,16 +12,9 @@ This file should approximately contain:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Dict
 
-
-class Currency(Enum):
-    SGD = 1
-    USD = 2
-    EUR = 3
-    GBP = 4
-
+from models.enums import Currency
 
 @dataclass
 class Account:

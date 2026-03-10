@@ -4,13 +4,14 @@ services:
     container_name: bank_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: DB_NAME
-      POSTGRES_USER: DB_USER
-      POSTGRES_PASSWORD: DB_PASSWORD
+      POSTGRES_DB: bank_db
+      POSTGRES_USER: bank_user
+      POSTGRES_PASSWORD: bank_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init_db:/docker-entrypoint-initdb.d
 
 volumes:
   postgres_data:

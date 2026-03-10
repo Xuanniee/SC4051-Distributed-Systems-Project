@@ -41,14 +41,32 @@ class StandardResponse:
     status: StatusCode
     message: str
 
-
 @dataclass
 class OpenAccountResponse(StandardResponse):
     account_number: Optional[int] = None
-
 
 @dataclass
 class BalanceResponse(StandardResponse):
     account_number: Optional[int] = None
     balance: Optional[float] = None
     currency: Optional[Currency] = None
+    
+# Monitoring API Messages ################################################################################################
+@dataclass
+class MonitorRequest:
+    duration_seconds: int
+
+@dataclass
+class CallbackUpdate:
+    event_name: str
+    account_number: int
+    owner_name: str
+    currency: Currency
+    balance: float
+    note: str
+
+# Metadata about a Request to implement at most once semantics
+@dataclass(frozen=True)
+class RequestMeta:
+    client_id: str
+    request_id: int
