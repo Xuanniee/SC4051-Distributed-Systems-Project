@@ -26,5 +26,8 @@ def parse_request(opcode: OpCode, payload: bytes):
 
     if opcode == OpCode.MONITOR_REGISTER:
         return decode_monitor_request(payload)
+    
+    if opcode == OpCode.BALANCE_INQUIRY:
+        return decode_balance_inquiry_request(payload)
 
     raise ValueError(f"Unsupported opcode for request parsing: {opcode}")
