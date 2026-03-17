@@ -21,6 +21,7 @@ class OpCode(Enum):
     DEPOSIT = 3
     WITHDRAW = 4
     MONITOR_REGISTER = 5
+    TRANSFER = 6
 
 class StatusCode(Enum):
     SUCCESS = 0

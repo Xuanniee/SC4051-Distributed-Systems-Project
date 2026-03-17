@@ -33,4 +33,7 @@ class Dispatcher:
         if opcode == OpCode.WITHDRAW:
             return self.banking_handlers.handle_withdraw(payload, client_address, request_meta)
 
+        if opcode == OpCode.TRANSFER:
+            return self.banking_handlers.handle_transfer(payload, client_address, request_meta)
+
         raise ValueError(f"Unsupported opcode: {opcode}")

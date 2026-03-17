@@ -30,7 +30,7 @@ def main() -> None:
     client_socket.bind(("127.0.0.1", 9001))
     
     # Send a monitor Request to the Backend server to monitor for 5 mins
-    request = MonitorRequest(duration_seconds=10)
+    request = MonitorRequest(duration_seconds=300)
     client_id = "monitor-client"
     request_id = 1
     header = encode_invocation_header(client_id, request_id)
