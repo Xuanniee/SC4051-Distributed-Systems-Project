@@ -9,6 +9,7 @@ from protocols.codecs import (
     decode_deposit_withdraw_request,
     decode_monitor_request,
     decode_open_account_request,
+    decode_balance_inquiry_request
 )
 
 def parse_request(opcode: OpCode, payload: bytes):

@@ -10,6 +10,7 @@ from protocols.codecs import (
     encode_balance_response,
     encode_open_account_response,
     encode_standard_response,
+    decode_transfer_request,
 )
 from protocols.request_parser import parse_request
 
@@ -152,11 +153,31 @@ class BankingHandlers:
                 return encode_balance_response(response)
 
             return encode_standard_response(response)
-
         except Exception as exc:
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
                     message=f"Balance inquiry handler error: {exc}",
+                )
+            )
+    
+    # Handler for transfer requests
+    def handle_transfer(self, payload: bytes, client_address, request_meta=None) -> bytes:
+        try:
+            # After decoding, execute the transfer request
+            request = decode_transfer_request(payload)
+            response = self.bank_service.transfer(request)
+
+            # Transfer will return a check balance functionality
+            if isinstance(response, BalanceResponse):
+                return encode_balance_response(response)
+
+            return encode_standard_response(response)
+        
+        except Exception as exc:
+            return encode_standard_response(
+                StandardResponse(
+                    status=StatusCode.ERROR,
+                    message=f"Transfer handler error: {exc}",
                 )
             )

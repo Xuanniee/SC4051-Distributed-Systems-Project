@@ -53,8 +53,19 @@ class OpenAccountResponse(StandardResponse):
 
 @dataclass
 class BalanceResponse(StandardResponse):
+    account_number: Optional[int] = None
     balance: Optional[float] = None
     currency: Optional[Currency] = None
+    
+# Transfer Requests ######################################################################################################
+@dataclass
+class TransferRequest:
+    from_name: str
+    from_account_number: int
+    password: str
+    to_account_number: int
+    currency: Currency
+    amount: float
     
 # Monitoring API Messages ################################################################################################
 @dataclass

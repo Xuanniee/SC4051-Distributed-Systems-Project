@@ -60,4 +60,5 @@ python -m tests.test_monitor_client
 python -m tests.test_action_client
 python -m tests.test_bank_services
 python -m tests.test_at_most_once
+python -m tests.test_transfer
 ```
