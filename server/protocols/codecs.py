@@ -16,6 +16,7 @@ from models.messages import (
     OpenAccountResponse,
     StandardResponse,
     TransferRequest,
+    BalanceInquiryRequest
 )
 from protocols.marshaller import BufferReader, BufferWriter
 
@@ -90,6 +91,21 @@ def decode_transfer_request(payload: bytes) -> TransferRequest:
         to_account_number=reader.read_u32(),
         currency=Currency(reader.read_u8()),
         amount=reader.read_f64(),
+    )
+
+def encode_balance_inquiry_request(message: BalanceInquiryRequest) -> bytes:
+    writer = BufferWriter()
+    writer.write_str(message.name)
+    writer.write_u32(message.account_number)
+    writer.write_str(message.password)
+    return writer.to_bytes()
+
+def decode_balance_inquiry_request(payload: bytes) -> BalanceInquiryRequest:
+    reader = BufferReader(payload)
+    return BalanceInquiryRequest(
+        name=reader.read_str(),
+        account_number=reader.read_u32(),
+        password=reader.read_str(),
     )
 
 def encode_monitor_request(message: MonitorRequest) -> bytes:

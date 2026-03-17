@@ -1,6 +1,7 @@
 """
 Implements core banking operations.
 """
+
 from __future__ import annotations
 
 from models.accounts import Account
@@ -14,6 +15,7 @@ from models.messages import (
     OpenAccountResponse,
     StandardResponse,
     TransferRequest,
+    BalanceInquiryRequest
 )
 from storage.account_store import accounts, generate_account_number
 
@@ -330,4 +332,43 @@ class BankService:
             account_number=sender_account.account_number,
             balance=sender_account.balance,
             currency=sender_account.currency,
+        )
+
+    def check_balance(self, request: BalanceInquiryRequest):
+        if request.account_number not in accounts:
+            return StandardResponse(
+                status=StatusCode.ERROR,
+                message="Account not found",
+            )
+
+        account = accounts[request.account_number]
+
+        if account.owner_name != request.name:
+            return StandardResponse(
+                status=StatusCode.ERROR,
+                message="Account name does not match",
+            )
+
+        if not account.check_password(request.password):
+            return StandardResponse(
+                status=StatusCode.ERROR,
+                message="Invalid password",
+            )
+        
+        self._notify(
+            CallbackUpdate(
+                event_name="BALANCE_INQUIRY",
+                account_number=account.account_number,
+                owner_name=account.owner_name,
+                currency=account.currency,
+                balance=account.balance,
+                note=f"Balance inquiry successful",
+            )
+        )
+
+        return BalanceResponse(
+            status=StatusCode.SUCCESS,
+            message="Balance inquiry successful",
+            balance=account.balance,
+            currency=account.currency,
         )

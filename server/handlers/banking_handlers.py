@@ -140,6 +140,27 @@ class BankingHandlers:
                 )
             )
         
+    def handle_balance_inquiry(
+        self,
+        payload: bytes,
+        client_address: Tuple[str, int],
+        request_meta: RequestMeta,
+    ) -> bytes:
+        try:
+            request = parse_request(OpCode.BALANCE_INQUIRY, payload)
+            response = self.bank_service.check_balance(request)
+            if isinstance(response, BalanceResponse):
+                return encode_balance_response(response)
+
+            return encode_standard_response(response)
+        except Exception as exc:
+            return encode_standard_response(
+                StandardResponse(
+                    status=StatusCode.ERROR,
+                    message=f"Balance inquiry handler error: {exc}",
+                )
+            )
+    
     # Handler for transfer requests
     def handle_transfer(self, payload: bytes, client_address, request_meta=None) -> bytes:
         try:

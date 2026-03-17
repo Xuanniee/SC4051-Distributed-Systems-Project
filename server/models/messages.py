@@ -37,6 +37,12 @@ class DepositWithdrawRequest:
 	amount: float
 
 @dataclass
+class BalanceInquiryRequest:
+	name: str
+	account_number: int
+	password: str
+
+@dataclass
 class StandardResponse:
     status: StatusCode
     message: str

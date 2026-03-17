@@ -35,5 +35,8 @@ class Dispatcher:
 
         if opcode == OpCode.TRANSFER:
             return self.banking_handlers.handle_transfer(payload, client_address, request_meta)
-
+        
+        if opcode == OpCode.BALANCE_INQUIRY:
+            return self.banking_handlers.handle_balance_inquiry(payload, client_address, request_meta)
+            
         raise ValueError(f"Unsupported opcode: {opcode}")

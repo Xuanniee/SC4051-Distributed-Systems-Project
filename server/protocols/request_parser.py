@@ -9,6 +9,7 @@ from protocols.codecs import (
     decode_deposit_withdraw_request,
     decode_monitor_request,
     decode_open_account_request,
+    decode_balance_inquiry_request
 )
 
 def parse_request(opcode: OpCode, payload: bytes):
@@ -26,5 +27,8 @@ def parse_request(opcode: OpCode, payload: bytes):
 
     if opcode == OpCode.MONITOR_REGISTER:
         return decode_monitor_request(payload)
+    
+    if opcode == OpCode.BALANCE_INQUIRY:
+        return decode_balance_inquiry_request(payload)
 
     raise ValueError(f"Unsupported opcode for request parsing: {opcode}")
