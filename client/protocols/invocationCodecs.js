@@ -13,6 +13,6 @@ module.exports = {
         const requestId = reader.readU32();
 
         const remainingPayload = payload.slice(reader.offset);
-        return { clientId, requestId, ...remainingPayload };
+        return { clientId, requestId, remainingPayload };
     }
 } 
