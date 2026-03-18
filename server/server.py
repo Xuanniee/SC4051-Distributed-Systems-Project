@@ -38,6 +38,11 @@ def parse_args():
         type=float,
         default=0.0,
     )
+    parser.add_argument(
+        "--drop-request-rate",
+        type=float,
+        default=0.0,
+    )
     return parser.parse_args()
 
 def should_drop_reply(drop_reply_rate: float) -> bool:
@@ -48,6 +53,13 @@ def should_drop_reply(drop_reply_rate: float) -> bool:
         return False
     return random.random() < drop_reply_rate
 
+def should_drop_request(drop_request_rate: float) -> bool:
+    """
+    Random function to decide if we should drop a request to simulate data loss
+    """
+    if drop_request_rate <= 0.0:
+        return False
+    return random.random() < drop_request_rate
 
 def main() -> None:
     args = parse_args()
@@ -64,7 +76,6 @@ def main() -> None:
     dispatcher = Dispatcher(banking_handlers)
     
 	# Create the Invokation Semantic Services here
-    # TODO Add AT least once next time
     at_most_once_service = AtMostOnceService()
 
     # While server is listening
@@ -72,6 +83,9 @@ def main() -> None:
         try:
             # Extract the data payload and client IP
             data, client_address = server_socket.recvfrom(BUFFER_SIZE)
+            if should_drop_request(args.drop_request_rate):
+                continue
+
             if not data:
                 continue
 
@@ -118,7 +132,6 @@ def main() -> None:
                             response_bytes,
                         )
                 else:
-                    # TODO should change this to at least once next time
                     response_bytes = dispatcher.dispatch(
                         opcode,
                         request_body,
@@ -128,7 +141,7 @@ def main() -> None:
             except Exception as exc:
                 response_bytes = build_error_response(f"Dispatch error: {exc}")
 
-			# Randomly drop data requests to simulate loss
+			# Randomly drop data replies to simulate loss
             if should_drop_reply(args.drop_reply_rate):
                 continue
 
