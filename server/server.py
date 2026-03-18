@@ -64,7 +64,6 @@ def main() -> None:
     dispatcher = Dispatcher(banking_handlers)
     
 	# Create the Invokation Semantic Services here
-    # TODO Add AT least once next time
     at_most_once_service = AtMostOnceService()
 
     # While server is listening
@@ -118,7 +117,6 @@ def main() -> None:
                             response_bytes,
                         )
                 else:
-                    # TODO should change this to at least once next time
                     response_bytes = dispatcher.dispatch(
                         opcode,
                         request_body,

@@ -1,5 +1,5 @@
 """
-This test ensures that the at most once invokation is working on the server side with a simple non-idempotent
+This test ensures that the at most once invocation is working on the server side with a simple non-idempotent
 deposit request.
 
 Client will be the one sending the request id and client id. Server will not assign these values but simply
