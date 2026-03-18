@@ -43,6 +43,11 @@ def parse_args():
         type=float,
         default=0.0,
     )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=0.0,
+    )
     return parser.parse_args()
 
 def should_drop_reply(drop_reply_rate: float) -> bool:
@@ -146,6 +151,7 @@ def main() -> None:
                 continue
 
             # After getting responses, return to client
+            time.sleep(args.timeout)
             server_socket.sendto(response_bytes, client_address)
 
         except KeyboardInterrupt:
