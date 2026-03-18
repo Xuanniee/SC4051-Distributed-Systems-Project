@@ -1,9 +1,7 @@
-const createRequestIdGenerator = require("./createRequestIdGenerator");
-const generateClientId = require("./generateClientId.js");
-const constants = require("./constants");
-
 module.exports = {
-    createRequestIdGenerator,
-    generateClientId,
-    constants
+    createRequestIdGenerator: require("./createRequestIdGenerator"),
+    generateClientId: require("./generateClientId.js"),
+    constants: require("./constants"),
+    buildPacket: require("./buildPacket"),
+    socketSend: require("./socketSend")
 };

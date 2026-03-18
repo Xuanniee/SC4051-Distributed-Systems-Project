@@ -1,15 +1,21 @@
-const { generateClientId } = require('./helpers');
+const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
+const { OP_CODE, CURRENCY } = require('./helpers/constants');
+const { openAccount } = require('./services/bank');
+const dgram = require('node:dgram');
 
 async function client() {
-    const PORT = process.env.PORT || 5000;
-    const HOST = process.env.HOST || 'localhost';
+    const port = process.env.PORT || 5000;
+    const host = process.env.HOST || 'localhost';
+
+    const socket = dgram.createSocket('udp4');
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
+    const nextRequestId = createRequestIdGenerator();
 
     console.log(`
-        Client is running on http://${HOST}:${PORT}
+        Client is running on http://${host}:${port}
         Client ID: ${clientId}
         `);
 
@@ -17,27 +23,41 @@ async function client() {
     while (true) {
         const option = await rl.question(`
             --- Bank Client ---
-            1. Check Balance
+            1. Open Account
             2. Deposit
             3. Withdraw
-            4. Exit
+            8. Exit
 
-            Please select an option: `);
+            Please select an option: `); // TODO: Check balance
 
         switch (option.trim()) {
-            case '1':
-                console.log('Checking balance... (not implemented)');
+            case OP_CODE.OPEN_ACCOUNT.toString():
+                try {
+                    const name = await rl.question('Enter account name: ');
+                    const password = await rl.question('Enter account password: ');
+                    const initialBalance = await rl.question('Enter initial balance (default 0): ');
+                    const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
+                    await openAccount({ socket, clientId, requestId: nextRequestId() }, {
+                        name,
+                        password,
+                        initialBalance: parseFloat(initialBalance) || 0,
+                        currency: parseInt(currency) || 1
+                    });
+                } catch (err) {
+                    console.error(`\nError: ${err.message}`);
+                }
                 break;
-            case '2':
+            case OP_CODE.DEPOSIT.toString():
                 console.log('Depositing... (not implemented)');
                 break;
-            case '3':
+            case OP_CODE.WITHDRAW.toString():
                 console.log('Withdrawing... (not implemented)');
                 break;
-            case '4':
-                console.log('Exiting client. Goodbye!');
+            case '8':
+                console.log('Exiting...');
                 rl.close();
-                return;
+                socket.close();
+                process.exit(0);
             default:
                 console.log('\nInvalid option. Please try again.\n');
         }

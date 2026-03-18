@@ -4,10 +4,31 @@ const OP_CODE = {
     DEPOSIT: 3,
     WITHDRAW: 4,
     MONITOR_REGISTER: 5,
-    MONITOR_UNREGISTER: 6,
-    GET_BALANCE: 7
+    BALANCE_INQUIRY: 6,
+    TRANSFER: 7
 }
 
+const STATUS_CODE = {
+    SUCCESS: 0,
+    ERROR: 1,
+    INVALID_PASSWORD: 2,
+    ACCOUNT_NOT_FOUND: 3,
+    INSUFFICIENT_FUNDS: 4,
+    INVALID_REQUEST: 5
+}
+
+const CURRENCY = {
+    SGD: 1,
+    USD: 2,
+    EUR: 3,
+    GBP: 4
+}
+
+const CLIENT_BUFFER_SIZE = 4096;
+
 module.exports = {
-    OP_CODE
+    OP_CODE,
+    CURRENCY,
+    CLIENT_BUFFER_SIZE,
+    STATUS_CODE
 }
