@@ -41,7 +41,7 @@ module.exports = {
 
         return writer.toBuffer();
     },
-    encodeDepositRequest: ({ name, accountNo, password, currency = 1, amount }) => {
+    encodeWithdrawDepositRequest: ({ name, accountNo, password, currency = 1, amount }) => {
         const writer = new BufferWriter();
 
         writer.writeString(name);
@@ -52,7 +52,7 @@ module.exports = {
 
         return writer.toBuffer();
     },
-    decodeDepositResponse: (buffer) => {
+    decodeWithdrawDepositResponse: (buffer) => {
         const reader = new BufferReader(buffer);
 
         const statusCode = reader.readU8();
