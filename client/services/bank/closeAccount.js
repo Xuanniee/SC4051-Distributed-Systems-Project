@@ -1,0 +1,23 @@
+const { encodeCloseAccountRequest, decodeStandardResponse } = require("../../protocols/codecs");
+const { OP_CODE } = require("../../helpers/constants");
+const { buildPacket, socketSend } = require("../../helpers");
+
+module.exports = async function closeAccount({ socket, clientId, requestId },
+    { name, password, accountNo }) {
+    if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
+        throw new Error('Invalid account details');
+    }
+
+    const bodyBuffer = encodeCloseAccountRequest({ name, password, accountNo });
+    const packet = buildPacket(OP_CODE.CLOSE_ACCOUNT, clientId, requestId, bodyBuffer);
+
+    try {
+        const encodedReply = await socketSend(socket, packet);
+        const reply = decodeStandardResponse(encodedReply);
+        console.log("\nResponse:", reply);
+    } catch (err) {
+        console.error('Failed to send close account request:', err);
+    }
+
+    return;
+}

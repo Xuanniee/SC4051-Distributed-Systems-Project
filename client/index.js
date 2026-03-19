@@ -2,7 +2,7 @@ const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
 const { OP_CODE, CURRENCY } = require('./helpers/constants');
-const { openAccount } = require('./services/bank');
+const { openAccount, closeAccount } = require('./services/bank');
 const dgram = require('node:dgram');
 
 async function client() {
@@ -52,7 +52,14 @@ async function client() {
                 }
                 break;
             case OP_CODE.CLOSE_ACCOUNT.toString():
-                console.log('Closing account... (not implemented)');
+                const name = await rl.question('Enter account name: ');
+                const password = await rl.question('Enter account password: ');
+                const accountNo = await rl.question('Enter account number: ');
+                await closeAccount({ socket, clientId, requestId: nextRequestId() }, {
+                    name,
+                    password,
+                    accountNo: parseInt(accountNo) || -1
+                });
                 break;
             case OP_CODE.DEPOSIT.toString():
                 console.log('Depositing... (not implemented)');
