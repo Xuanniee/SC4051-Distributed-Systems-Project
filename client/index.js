@@ -2,7 +2,7 @@ const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
 const { OP_CODE, CURRENCY } = require('./helpers/constants');
-const { openAccount, closeAccount } = require('./services/bank');
+const { openAccount, closeAccount, deposit } = require('./services/bank');
 const dgram = require('node:dgram');
 
 async function client() {
@@ -52,17 +52,36 @@ async function client() {
                 }
                 break;
             case OP_CODE.CLOSE_ACCOUNT.toString():
-                const name = await rl.question('Enter account name: ');
-                const password = await rl.question('Enter account password: ');
-                const accountNo = await rl.question('Enter account number: ');
-                await closeAccount({ socket, clientId, requestId: nextRequestId() }, {
-                    name,
-                    password,
-                    accountNo: parseInt(accountNo) || -1
-                });
+                try {
+                    const name = await rl.question('Enter account name: ');
+                    const password = await rl.question('Enter account password: ');
+                    const accountNo = await rl.question('Enter account number: ');
+                    await closeAccount({ socket, clientId, requestId: nextRequestId() }, {
+                        name,
+                        password,
+                        accountNo: parseInt(accountNo) || -1
+                    });
+                } catch (err) {
+                    console.error(`\nError: ${err.message}`);
+                }
                 break;
             case OP_CODE.DEPOSIT.toString():
-                console.log('Depositing... (not implemented)');
+                try {
+                    const name = await rl.question('Enter account name: ');
+                    const password = await rl.question('Enter account password: ');
+                    const accountNo = await rl.question('Enter account number: ');
+                    const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
+                    const amount = await rl.question('Enter deposit amount: ');
+                    await deposit({ socket, clientId, requestId: nextRequestId() }, {
+                        name,
+                        password,
+                        accountNo: parseInt(accountNo) || -1,
+                        currency: parseInt(currency) || 1,
+                        amount: parseFloat(amount) || 0
+                    });
+                } catch (err) {
+                    console.error(`\nError: ${err.message}`);
+                }
                 break;
             case OP_CODE.WITHDRAW.toString():
                 console.log('Withdrawing... (not implemented)');
