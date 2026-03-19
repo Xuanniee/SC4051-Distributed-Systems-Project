@@ -1,6 +1,6 @@
-const { OP_CODE } = require('../../helpers/constants.js');
-const { buildPacket, socketSend } = require('../../helpers');
-const { encodeBalanceInquiryRequest, decodeBalanceInquiryResponse } = require('../../protocols/codecs.js');
+const { OP_CODE } = require('../helpers/constants.js');
+const { buildPacket, socketSend } = require('../helpers');
+const { encodeBalanceInquiryRequest, decodeBalanceInquiryResponse } = require('../protocols/codecs.js');
 
 module.exports = async function balanceInquiry({ socket, clientId, requestId },
     { name, accountNo, password }) {

@@ -122,5 +122,24 @@ module.exports = {
         const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
 
         return { statusCode, status, message, accountNo, balance, currency };
+    },
+    encodeMonitorRequest: (durationSecs) => {
+        const writer = new BufferWriter();
+
+        writer.writeU32(durationSecs);
+
+        return writer.toBuffer();
+    },
+    decodeCallbackResponse: (buffer) => {
+        const reader = new BufferReader(buffer);
+
+        const eventName = reader.readString();
+        const accountNo = reader.readU32();
+        const ownerName = reader.readString();
+        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === reader.readU8());
+        const balance = reader.readF64();
+        const note = reader.readString();
+
+        return { eventName, accountNo, ownerName, currency, balance, note };
     }
 }

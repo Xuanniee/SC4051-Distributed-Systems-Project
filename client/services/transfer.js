@@ -1,6 +1,6 @@
-const { OP_CODE, CURRENCY } = require('../../helpers/constants.js');
-const { buildPacket, socketSend } = require('../../helpers');
-const { encodeTransferRequest, decodeTransferResponse } = require('../../protocols/codecs.js');
+const { OP_CODE, CURRENCY } = require('../helpers/constants.js');
+const { buildPacket, socketSend } = require('../helpers');
+const { encodeTransferRequest, decodeTransferResponse } = require('../protocols/codecs.js');
 
 module.exports = async function transfer({ socket, clientId, requestId },
     { fromName, fromAccountNo, password, toAccountNo, currency = 1, amount = 0 }) {

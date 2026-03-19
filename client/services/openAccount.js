@@ -1,6 +1,6 @@
-const { buildPacket, socketSend } = require("../../helpers");
-const { OP_CODE, CURRENCY } = require("../../helpers/constants");
-const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../../protocols/codecs");
+const { buildPacket, socketSend } = require("../helpers");
+const { OP_CODE, CURRENCY } = require("../helpers/constants");
+const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../protocols/codecs");
 
 async function openAccount({ socket, clientId, requestId },
     { name, password, initialBalance = 0, currency = 1 }) {

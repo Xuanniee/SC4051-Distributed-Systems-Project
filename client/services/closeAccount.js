@@ -1,6 +1,6 @@
-const { encodeCloseAccountRequest, decodeStandardResponse } = require("../../protocols/codecs");
-const { OP_CODE } = require("../../helpers/constants");
-const { buildPacket, socketSend } = require("../../helpers");
+const { encodeCloseAccountRequest, decodeStandardResponse } = require("../protocols/codecs");
+const { OP_CODE } = require("../helpers/constants");
+const { buildPacket, socketSend } = require("../helpers");
 
 module.exports = async function closeAccount({ socket, clientId, requestId },
     { name, password, accountNo }) {

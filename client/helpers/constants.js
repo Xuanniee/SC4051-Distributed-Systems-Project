@@ -24,7 +24,7 @@ const CURRENCY = {
     GBP: 4
 }
 
-const CLIENT_BUFFER_SIZE = 4096;
+const CLIENT_BUFFER_SIZE = 4096; // TODO
 
 module.exports = {
     OP_CODE,

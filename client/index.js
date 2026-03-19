@@ -2,22 +2,18 @@ const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
 const { OP_CODE, CURRENCY } = require('./helpers/constants');
-const { openAccount, closeAccount, deposit, withdraw, balanceInquiry, transfer } = require('./services/bank');
+const BankServices = require('./services');
 const dgram = require('node:dgram');
+const monitorCallback = require('./protocols/monitorCallback');
 
 async function client() {
-    const port = process.env.PORT || 5000;
-    const host = process.env.HOST || 'localhost';
-
     const socket = dgram.createSocket('udp4');
+    let isMonitoring = false;
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
     const nextRequestId = createRequestIdGenerator();
 
-    console.log(`
-        Client is running on http://${host}:${port}
-        Client ID: ${clientId}
-        `);
+    console.log(`App started with Client ID: ${clientId}\n`);
 
     const rl = readline.createInterface({ input, output });
     while (true) {
@@ -32,7 +28,7 @@ async function client() {
             7. Transfer
             8. Exit
 
-            Please select an option: `); // TODO: Check balance
+            Please select an option: `);
 
         switch (option.trim()) {
             case OP_CODE.OPEN_ACCOUNT.toString():
@@ -41,7 +37,7 @@ async function client() {
                     const password = await rl.question('Enter account password: ');
                     const initialBalance = await rl.question('Enter initial balance (default 0): ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
-                    const reply = await openAccount({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.openAccount({ socket, clientId, requestId: nextRequestId() }, {
                         name,
                         password,
                         initialBalance: parseFloat(initialBalance) || 0,
@@ -57,7 +53,7 @@ async function client() {
                     const name = await rl.question('Enter account name: ');
                     const password = await rl.question('Enter account password: ');
                     const accountNo = await rl.question('Enter account number: ');
-                    const reply = await closeAccount({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.closeAccount({ socket, clientId, requestId: nextRequestId() }, {
                         name,
                         password,
                         accountNo: parseInt(accountNo) || -1
@@ -74,7 +70,7 @@ async function client() {
                     const accountNo = await rl.question('Enter account number: ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter deposit amount: ');
-                    const reply = await deposit({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.deposit({ socket, clientId, requestId: nextRequestId() }, {
                         name,
                         password,
                         accountNo: parseInt(accountNo) || -1,
@@ -93,7 +89,7 @@ async function client() {
                     const accountNo = await rl.question('Enter account number: ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter withdrawal amount: ');
-                    const reply = await withdraw({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.withdraw({ socket, clientId, requestId: nextRequestId() }, {
                         name,
                         password,
                         accountNo: parseInt(accountNo) || -1,
@@ -106,14 +102,32 @@ async function client() {
                 }
                 break;
             case OP_CODE.MONITOR_REGISTER.toString():
-                console.log('Registering monitor... (not implemented)');
+                try {
+                    if (isMonitoring) {
+                        console.log('\nAlready registered for monitoring updates.\n');
+                        break;
+                    }
+
+                    const durationSecs = await rl.question('Enter monitoring duration in seconds (default 300): ');
+                    const parsedDurationSecs = parseInt(durationSecs, 10) || 300;
+
+                    monitorCallback(socket);
+                    isMonitoring = true;
+
+                    const reply = await BankServices.monitor({ socket, clientId, requestId: nextRequestId() },
+                        parsedDurationSecs);
+                    console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully!\n`, reply);
+                } catch (err) {
+                    console.error(`\nError: ${err.message}`);
+                    isMonitoring = false;
+                }
                 break;
             case OP_CODE.BALANCE_INQUIRY.toString():
                 try {
                     const name = await rl.question('Enter account name: ');
                     const password = await rl.question('Enter account password: ');
                     const accountNo = await rl.question('Enter account number: ');
-                    const reply = await balanceInquiry({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.balanceInquiry({ socket, clientId, requestId: nextRequestId() }, {
                         name,
                         password,
                         accountNo: parseInt(accountNo) || -1,
@@ -132,7 +146,7 @@ async function client() {
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter transfer amount: ');
 
-                    const reply = await transfer({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.transfer({ socket, clientId, requestId: nextRequestId() }, {
                         fromName,
                         password,
                         fromAccountNo: parseInt(fromAccountNo) || -1,
