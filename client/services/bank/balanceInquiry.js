@@ -4,14 +4,17 @@ const { encodeBalanceInquiryRequest, decodeBalanceInquiryResponse } = require('.
 
 module.exports = async function balanceInquiry({ socket, clientId, requestId },
     { name, accountNo, password }) {
+    if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
+        throw new Error('Invalid account details');
+    }
+
     const bodyBuffer = encodeBalanceInquiryRequest({ name, password, accountNo });
     const packet = buildPacket(OP_CODE.BALANCE_INQUIRY, clientId, requestId, bodyBuffer);
 
     try {
         const encodedReply = await socketSend(socket, packet);
-        const reply = decodeBalanceInquiryResponse(encodedReply);
-        console.log("\nResponse:", reply);
+        return decodeBalanceInquiryResponse(encodedReply);
     } catch (err) {
-        console.error('Failed to send balance inquiry request:', err);
+        throw new Error('Failed to send balance inquiry request:', err);
     }
 }

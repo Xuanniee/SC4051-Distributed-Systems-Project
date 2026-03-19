@@ -3,5 +3,6 @@ module.exports = {
     closeAccount: require('./closeAccount'),
     deposit: require('./deposit'),
     withdraw: require('./withdraw'),
-    balanceInquiry: require('./balanceInquiry')
+    balanceInquiry: require('./balanceInquiry'),
+    transfer: require('./transfer')
 }

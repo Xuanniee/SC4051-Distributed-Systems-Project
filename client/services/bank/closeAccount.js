@@ -13,11 +13,8 @@ module.exports = async function closeAccount({ socket, clientId, requestId },
 
     try {
         const encodedReply = await socketSend(socket, packet);
-        const reply = decodeStandardResponse(encodedReply);
-        console.log("\nResponse:", reply);
+        return decodeStandardResponse(encodedReply);
     } catch (err) {
-        console.error('Failed to send close account request:', err);
+        throw new Error('Failed to send close account request:', err);
     }
-
-    return;
 }

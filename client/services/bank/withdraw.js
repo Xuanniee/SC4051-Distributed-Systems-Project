@@ -3,7 +3,11 @@ const { buildPacket, socketSend } = require('../../helpers');
 const { encodeWithdrawDepositRequest, decodeWithdrawDepositResponse } = require('../../protocols/codecs.js');
 
 module.exports = async function withdraw({ socket, clientId, requestId },
-    { name, accountNo, password, currency = 1, amount }) {
+    { name, accountNo, password, currency = 1, amount = 0 }) {
+    if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
+        throw new Error('Invalid account details');
+    }
+
     if (currency < 1 || currency > Object.keys(CURRENCY).length) {
         throw new Error('Invalid currency');
     }
@@ -17,9 +21,8 @@ module.exports = async function withdraw({ socket, clientId, requestId },
 
     try {
         const encodedReply = await socketSend(socket, packet);
-        const reply = decodeWithdrawDepositResponse(encodedReply);
-        console.log("\nResponse:", reply);
+        return decodeWithdrawDepositResponse(encodedReply);
     } catch (err) {
-        console.error('Failed to send withdrawal request:', err);
+        throw new Error('Failed to send withdrawal request:', err);
     }
 }

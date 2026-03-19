@@ -93,5 +93,34 @@ module.exports = {
         const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
 
         return { statusCode, status, message, balance, currency };
+    },
+    encodeTransferRequest: ({ fromName, fromAccountNo, password, toAccountNo, currency = 1, amount }) => {
+        const writer = new BufferWriter();
+
+        writer.writeString(fromName);
+        writer.writeU32(fromAccountNo);
+        writer.writeString(password);
+        writer.writeU32(toAccountNo);
+        writer.writeU8(currency);
+        writer.writeF64(amount);
+
+        return writer.toBuffer();
+    },
+    decodeTransferResponse: (buffer) => {
+        const reader = new BufferReader(buffer);
+
+        const statusCode = reader.readU8();
+        const status = Object.keys(STATUS_CODE).find(key => STATUS_CODE[key] === statusCode);
+        const message = reader.readString();
+        if (statusCode !== STATUS_CODE.SUCCESS) {
+            return { statusCode, status, message };
+        }
+
+        const accountNo = reader.readU32();
+        const balance = reader.readF64();
+        const currencyVal = reader.readU8();
+        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
+
+        return { statusCode, status, message, accountNo, balance, currency };
     }
 }

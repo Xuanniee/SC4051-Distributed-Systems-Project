@@ -4,6 +4,10 @@ const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../../p
 
 async function openAccount({ socket, clientId, requestId },
     { name, password, initialBalance = 0, currency = 1 }) {
+    if (!name || !password || password.length !== 8) {
+        throw new Error('Please enter a name and password with exactly 8 characters');
+    }
+
     if (currency < 1 || currency > Object.keys(CURRENCY).length) {
         throw new Error('Invalid currency');
     }
@@ -17,10 +21,9 @@ async function openAccount({ socket, clientId, requestId },
 
     try {
         const encodedReply = await socketSend(socket, packet);
-        const reply = decodeOpenAccountResponse(encodedReply);
-        console.log("\nResponse:", reply);
+        return decodeOpenAccountResponse(encodedReply);
     } catch (err) {
-        console.error('Failed to send open account request:', err);
+        throw new Error('Failed to send open account request:', err);
     }
 }
 
