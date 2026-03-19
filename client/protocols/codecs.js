@@ -1,4 +1,4 @@
-const { STATUS_CODE } = require("../helpers/constants");
+const { STATUS_CODE, CURRENCY } = require("../helpers/constants");
 const { BufferWriter, BufferReader } = require("./marshaller");
 
 module.exports = {
@@ -67,5 +67,31 @@ module.exports = {
         const currency = reader.readU8();
 
         return { statusCode, status, message, accountNo, balance: newBalance, currency };
+    },
+    encodeBalanceInquiryRequest: ({ name, accountNo, password }) => {
+        const writer = new BufferWriter();
+
+        writer.writeString(name);
+        writer.writeU32(accountNo);
+        writer.writeString(password);
+
+        return writer.toBuffer();
+    },
+    decodeBalanceInquiryResponse: (buffer) => {
+        const reader = new BufferReader(buffer);
+
+        const statusCode = reader.readU8();
+        const status = Object.keys(STATUS_CODE).find(key => STATUS_CODE[key] === statusCode);
+        const message = reader.readString();
+        if (statusCode !== STATUS_CODE.SUCCESS) {
+            return { statusCode, status, message };
+        }
+
+        const accountNo = reader.readU32();
+        const balance = reader.readF64();
+        const currencyVal = reader.readU8();
+        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
+
+        return { statusCode, status, message, balance, currency };
     }
 }

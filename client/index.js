@@ -2,7 +2,7 @@ const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
 const { OP_CODE, CURRENCY } = require('./helpers/constants');
-const { openAccount, closeAccount, deposit, withdraw } = require('./services/bank');
+const { openAccount, closeAccount, deposit, withdraw, balanceInquiry } = require('./services/bank');
 const dgram = require('node:dgram');
 
 async function client() {
@@ -98,14 +98,25 @@ async function client() {
                         amount: parseFloat(amount) || 0
                     });
                 } catch (err) {
-                    console.error(`\nError: ${err.message}`);
+                    console.error(err.message);
                 }
                 break;
             case OP_CODE.MONITOR_REGISTER.toString():
                 console.log('Registering monitor... (not implemented)');
                 break;
             case OP_CODE.BALANCE_INQUIRY.toString():
-                console.log('Inquiring balance... (not implemented)');
+                try {
+                    const name = await rl.question('Enter account name: ');
+                    const password = await rl.question('Enter account password: ');
+                    const accountNo = await rl.question('Enter account number: ');
+                    await balanceInquiry({ socket, clientId, requestId: nextRequestId() }, {
+                        name,
+                        password,
+                        accountNo: parseInt(accountNo) || -1,
+                    });
+                } catch (err) {
+                    console.error(`\nError: ${err.message}`);
+                }
                 break;
             case OP_CODE.TRANSFER.toString():
                 console.log('Transferring... (not implemented)');

@@ -1,10 +1,10 @@
-const { constants, buildPacket, socketSend } = require("../../helpers");
-const { OP_CODE } = require("../../helpers/constants");
+const { buildPacket, socketSend } = require("../../helpers");
+const { OP_CODE, CURRENCY } = require("../../helpers/constants");
 const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../../protocols/codecs");
 
 async function openAccount({ socket, clientId, requestId },
     { name, password, initialBalance = 0, currency = 1 }) {
-    if (currency < 1 || currency > Object.keys(constants.CURRENCY).length) {
+    if (currency < 1 || currency > Object.keys(CURRENCY).length) {
         throw new Error('Invalid currency');
     }
 
