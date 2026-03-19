@@ -1,6 +1,6 @@
 const { constants, buildPacket, socketSend } = require("../../helpers");
-const { OP_CODE, STATUS_CODE } = require("../../helpers/constants");
-const { encodeOpenAccountRequest, decodeStandardResponse } = require("../../protocols/codecs");
+const { OP_CODE } = require("../../helpers/constants");
+const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../../protocols/codecs");
 
 async function openAccount({ socket, clientId, requestId },
     { name, password, initialBalance = 0, currency = 1 }) {
@@ -17,8 +17,8 @@ async function openAccount({ socket, clientId, requestId },
 
     try {
         const encodedReply = await socketSend(socket, packet);
-        const reply = decodeStandardResponse(encodedReply);
-        console.log("\nResponse:", { ...reply, status: Object.keys(STATUS_CODE).find(key => STATUS_CODE[key] === reply.statusCode) });
+        const reply = decodeOpenAccountResponse(encodedReply);
+        console.log("\nResponse:", reply);
     } catch (err) {
         console.error('Failed to send open account request:', err);
     }

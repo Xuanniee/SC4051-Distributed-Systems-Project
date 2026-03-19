@@ -24,8 +24,12 @@ async function client() {
         const option = await rl.question(`
             --- Bank Client ---
             1. Open Account
-            2. Deposit
-            3. Withdraw
+            2. Close Account
+            3. Deposit
+            4. Withdraw
+            5. Monitor Register
+            6. Balance Inquiry
+            7. Transfer
             8. Exit
 
             Please select an option: `); // TODO: Check balance
@@ -47,11 +51,23 @@ async function client() {
                     console.error(`\nError: ${err.message}`);
                 }
                 break;
+            case OP_CODE.CLOSE_ACCOUNT.toString():
+                console.log('Closing account... (not implemented)');
+                break;
             case OP_CODE.DEPOSIT.toString():
                 console.log('Depositing... (not implemented)');
                 break;
             case OP_CODE.WITHDRAW.toString():
                 console.log('Withdrawing... (not implemented)');
+                break;
+            case OP_CODE.MONITOR_REGISTER.toString():
+                console.log('Registering monitor... (not implemented)');
+                break;
+            case OP_CODE.BALANCE_INQUIRY.toString():
+                console.log('Inquiring balance... (not implemented)');
+                break;
+            case OP_CODE.TRANSFER.toString():
+                console.log('Transferring... (not implemented)');
                 break;
             case '8':
                 console.log('Exiting...');
