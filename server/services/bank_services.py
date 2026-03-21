@@ -369,6 +369,7 @@ class BankService:
         return BalanceResponse(
             status=StatusCode.SUCCESS,
             message="Balance inquiry successful",
+            account_number=account.account_number,
             balance=account.balance,
             currency=account.currency,
         )
