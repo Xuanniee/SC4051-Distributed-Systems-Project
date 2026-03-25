@@ -60,7 +60,7 @@ node index.js --timeout 3000 --retries 2 --monitor-duration 300
 
 |     | options            | default       |
 | --- | ------------------ | ------------- |
-| 1.  | --timeout          | 3000 (ms)     |
+| 1.  | --timeout          | 5000 (ms)     |
 | 2.  | --retries          | 2             |
 | 3.  | --monitor-duration | 300 (seconds) |
 
