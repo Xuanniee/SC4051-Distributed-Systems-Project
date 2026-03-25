@@ -92,7 +92,7 @@ module.exports = {
         const currencyVal = reader.readU8();
         const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
 
-        return { statusCode, status, message, balance, currency };
+        return { statusCode, status, message, balance, currency, accountNo };
     },
     encodeTransferRequest: ({ fromName, fromAccountNo, password, toAccountNo, currency = 1, amount }) => {
         const writer = new BufferWriter();

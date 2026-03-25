@@ -10,7 +10,7 @@ module.exports = function monitorCallback(socket) {
 
             console.log(`\n[MONITOR CALLBACK] ${update.eventName}\n`, update);
         } catch (err) {
-            console.error('Failed to decode monitor callback message:', err);
+            // console.error('Failed to decode monitor callback message:', err);
         }
     });
 }
