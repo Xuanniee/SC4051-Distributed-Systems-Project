@@ -4,11 +4,13 @@ This project implements the frontend client for a distributed banking system usi
 
 Please note that an ``.env`` file is required. The following keys are required but the values should be adjusted according to your archectural needs.
 
-> PORT=5000
+```
+PORT=5000
 HOST=localhost
 
 SERVER_HOST=0.0.0.0
 SERVER_PORT=2222
+```
 
 ---
 
