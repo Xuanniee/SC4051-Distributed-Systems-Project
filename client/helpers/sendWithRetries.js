@@ -82,8 +82,11 @@ module.exports = async function sendWithRetries(socket, packet, {
     let lastError;
     let currentTimeoutMs = timeoutMs;
 
-    for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+    for (let attempt = 0; attempt < maxRetries + 1; attempt++) {
         try {
+            if (attempt > 0) {
+                console.log(`Retry attempt ${attempt}`);
+            }
             return await socketSend(socket, packet, currentTimeoutMs);
         } catch (err) {
             lastError = err;
@@ -92,9 +95,13 @@ module.exports = async function sendWithRetries(socket, packet, {
                 throw err;
             }
 
+            if (attempt < maxRetries) {
+                console.error(`Request timeout (${currentTimeoutMs}ms). Will retry...`);
+            }
+
             currentTimeoutMs = Math.min(currentTimeoutMs * 2, 30000);
         }
     }
 
-    throw new Error(`Failed after ${maxRetries} attempts: ${lastError.message}`);
+    throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError.message}`);
 }

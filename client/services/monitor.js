@@ -14,6 +14,6 @@ module.exports = async function monitor({ socket, clientId, requestId, timeoutMs
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeStandardResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send monitor request:', err);
+        throw new Error('Failed to send monitor request', err);
     }
 }

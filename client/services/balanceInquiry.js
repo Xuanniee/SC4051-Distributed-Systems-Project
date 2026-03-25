@@ -15,6 +15,6 @@ module.exports = async function balanceInquiry({ socket, clientId, requestId, ti
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeBalanceInquiryResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send balance inquiry request:', err);
+        throw new Error('Failed to send balance inquiry request', err);
     }
 }

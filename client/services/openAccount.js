@@ -23,7 +23,7 @@ async function openAccount({ socket, clientId, requestId, timeoutMs, maxRetries 
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeOpenAccountResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send open account request:', err);
+        throw new Error('Failed to send open account request', err);
     }
 }
 

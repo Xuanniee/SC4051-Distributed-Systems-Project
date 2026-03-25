@@ -23,6 +23,6 @@ module.exports = async function withdraw({ socket, clientId, requestId, timeoutM
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeWithdrawDepositResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send withdrawal request:', err);
+        throw new Error('Failed to send withdrawal request', err);
     }
 }

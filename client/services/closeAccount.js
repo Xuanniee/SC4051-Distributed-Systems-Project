@@ -15,6 +15,6 @@ module.exports = async function closeAccount({ socket, clientId, requestId, time
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeStandardResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send close account request:', err);
+        throw new Error('Failed to send close account request', err);
     }
 }

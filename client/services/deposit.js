@@ -23,6 +23,6 @@ module.exports = async function deposit({ socket, clientId, requestId, timeoutMs
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeWithdrawDepositResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send deposit request:', err);
+        throw new Error('Failed to send deposit request', err);
     }
 }

@@ -27,6 +27,6 @@ module.exports = async function transfer({ socket, clientId, requestId, timeoutM
         const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeTransferResponse(encodedReply);
     } catch (err) {
-        throw new Error('Failed to send transfer request:', err);
+        throw new Error('Failed to send transfer request', err);
     }
 }
