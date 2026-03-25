@@ -119,12 +119,14 @@ def main() -> None:
                         request_meta.client_id,
                         request_meta.request_id,
                     ):
+                        print(f"[at-most-once] Returning stored reply for client {request_meta.client_id}, request {request_meta.request_id}")
                         # Retrun stored reply
                         response_bytes = at_most_once_service.get_reply(
                             request_meta.client_id,
                             request_meta.request_id,
                         )
                     else:
+                        print(f"[at-most-once] New request from client {request_meta.client_id}, request {request_meta.request_id}")
                         # Perform request since new and store
                         response_bytes = dispatcher.dispatch(
                             opcode,
@@ -138,6 +140,7 @@ def main() -> None:
                             response_bytes,
                         )
                 else:
+                    print(f"[at-least-once] Request from client {request_meta.client_id}, request {request_meta.request_id}")
                     response_bytes = dispatcher.dispatch(
                         opcode,
                         request_body,
