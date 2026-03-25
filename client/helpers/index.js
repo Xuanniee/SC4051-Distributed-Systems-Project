@@ -3,5 +3,6 @@ module.exports = {
     generateClientId: require("./generateClientId.js"),
     constants: require("./constants"),
     buildPacket: require("./buildPacket"),
-    socketSend: require("./socketSend")
+    sendWithRetries: require("./sendWithRetries.js"),
+    getArgs: require("./getArgs")
 };

@@ -1,8 +1,8 @@
 const { decodeStandardResponse, encodeMonitorRequest } = require('../protocols/codecs');
-const { buildPacket, socketSend } = require('../helpers');
+const { buildPacket, sendWithRetries } = require('../helpers');
 const { OP_CODE } = require('../helpers/constants');
 
-module.exports = async function monitor({ socket, clientId, requestId }, durationSecs = 300) {
+module.exports = async function monitor({ socket, clientId, requestId, timeoutMs, maxRetries }, durationSecs = 300) {
     if (durationSecs <= 0) {
         throw new Error('Monitoring duration must be a positive integer');
     }
@@ -11,7 +11,7 @@ module.exports = async function monitor({ socket, clientId, requestId }, duratio
     const packet = buildPacket(OP_CODE.MONITOR_REGISTER, clientId, requestId, bodyBuffer);
 
     try {
-        const encodedReply = await socketSend(socket, packet);
+        const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeStandardResponse(encodedReply);
     } catch (err) {
         throw new Error('Failed to send monitor request:', err);

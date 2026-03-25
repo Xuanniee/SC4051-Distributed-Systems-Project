@@ -1,8 +1,8 @@
 const { OP_CODE, CURRENCY } = require('../helpers/constants.js');
-const { buildPacket, socketSend } = require('../helpers');
+const { buildPacket, sendWithRetries } = require('../helpers');
 const { encodeWithdrawDepositRequest, decodeWithdrawDepositResponse } = require('../protocols/codecs.js');
 
-module.exports = async function deposit({ socket, clientId, requestId },
+module.exports = async function deposit({ socket, clientId, requestId, timeoutMs, maxRetries },
     { name, accountNo, password, currency = 1, amount = 0 }) {
     if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
         throw new Error('Invalid account details');
@@ -20,7 +20,7 @@ module.exports = async function deposit({ socket, clientId, requestId },
     const packet = buildPacket(OP_CODE.DEPOSIT, clientId, requestId, bodyBuffer);
 
     try {
-        const encodedReply = await socketSend(socket, packet);
+        const encodedReply = await sendWithRetries(socket, packet, { timeoutMs, maxRetries });
         return decodeWithdrawDepositResponse(encodedReply);
     } catch (err) {
         throw new Error('Failed to send deposit request:', err);

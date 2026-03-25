@@ -5,15 +5,22 @@ const { OP_CODE, CURRENCY } = require('./helpers/constants');
 const BankServices = require('./services');
 const dgram = require('node:dgram');
 const monitorCallback = require('./protocols/monitorCallback');
+const { getArgs } = require('./helpers');
 
 async function client() {
     const socket = dgram.createSocket('udp4');
     let isMonitoring = false;
+    const { timeoutMs, monitorDurationSeconds, maxRetries } = getArgs();
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
     const nextRequestId = createRequestIdGenerator();
 
-    console.log(`App started with Client ID: ${clientId}\n`);
+    console.log(`
+        App started with Client ID: ${clientId}\n
+        Request timeout (ms): ${timeoutMs}\n
+        Request retries: ${maxRetries}\n
+        Monitor duration (s): ${monitorDurationSeconds}\n
+    `);
 
     const rl = readline.createInterface({ input, output });
     while (true) {
@@ -37,11 +44,11 @@ async function client() {
                     const password = await rl.question('Enter account password: ');
                     const initialBalance = await rl.question('Enter initial balance (default 0): ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
-                    const reply = await BankServices.openAccount({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.openAccount({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
                         initialBalance: parseFloat(initialBalance) || 0,
-                        currency: parseInt(currency) || 1
+                        currency: parseInt(currency, 10) || 1,
                     });
                     console.log('\nAccount opened successfully!\n', reply);
                 } catch (err) {
@@ -53,10 +60,10 @@ async function client() {
                     const name = await rl.question('Enter account name: ');
                     const password = await rl.question('Enter account password: ');
                     const accountNo = await rl.question('Enter account number: ');
-                    const reply = await BankServices.closeAccount({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.closeAccount({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo) || -1
+                        accountNo: parseInt(accountNo, 10) || -1,
                     });
                     console.log('\nAccount closed successfully!\n', reply);
                 } catch (err) {
@@ -70,12 +77,12 @@ async function client() {
                     const accountNo = await rl.question('Enter account number: ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter deposit amount: ');
-                    const reply = await BankServices.deposit({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.deposit({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo) || -1,
-                        currency: parseInt(currency) || 1,
-                        amount: parseFloat(amount) || 0
+                        accountNo: parseInt(accountNo, 10) || -1,
+                        currency: parseInt(currency, 10) || 1,
+                        amount: parseFloat(amount) || 0,
                     });
                     console.log('\nDeposit successful!\n', reply);
                 } catch (err) {
@@ -89,12 +96,12 @@ async function client() {
                     const accountNo = await rl.question('Enter account number: ');
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter withdrawal amount: ');
-                    const reply = await BankServices.withdraw({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.withdraw({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo) || -1,
-                        currency: parseInt(currency) || 1,
-                        amount: parseFloat(amount) || 0
+                        accountNo: parseInt(accountNo, 10) || -1,
+                        currency: parseInt(currency, 10) || 1,
+                        amount: parseFloat(amount) || 0,
                     });
                     console.log('\nWithdrawal successful!\n', reply);
                 } catch (err) {
@@ -108,15 +115,17 @@ async function client() {
                         break;
                     }
 
-                    const durationSecs = await rl.question('Enter monitoring duration in seconds (default 300): ');
-                    const parsedDurationSecs = parseInt(durationSecs, 10) || 300;
+                    const durationSecs = await rl.question(`Enter monitoring duration in seconds (default ${monitorDurationSeconds}): `);
+                    const parsedDurationSecs = parseInt(durationSecs) || monitorDurationSeconds;
 
                     monitorCallback(socket);
                     isMonitoring = true;
 
-                    const reply = await BankServices.monitor({ socket, clientId, requestId: nextRequestId() },
-                        parsedDurationSecs);
-                    console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully!\n`, reply);
+                    const reply = await BankServices.monitor(
+                        { socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries },
+                        parsedDurationSecs,
+                    );
+                    console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully! (CTRL + C to exit)\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                     isMonitoring = false;
@@ -127,10 +136,10 @@ async function client() {
                     const name = await rl.question('Enter account name: ');
                     const password = await rl.question('Enter account password: ');
                     const accountNo = await rl.question('Enter account number: ');
-                    const reply = await BankServices.balanceInquiry({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.balanceInquiry({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo) || -1,
+                        accountNo: parseInt(accountNo, 10) || -1,
                     });
                     console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`, reply);
                 } catch (err) {
@@ -146,13 +155,13 @@ async function client() {
                     const currency = await rl.question(`Select currency (${Object.keys(CURRENCY).map(k => `${CURRENCY[k]}: ${k}`).join(', ')}, default 1): `);
                     const amount = await rl.question('Enter transfer amount: ');
 
-                    const reply = await BankServices.transfer({ socket, clientId, requestId: nextRequestId() }, {
+                    const reply = await BankServices.transfer({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         fromName,
                         password,
-                        fromAccountNo: parseInt(fromAccountNo) || -1,
-                        toAccountNo: parseInt(toAccountNo) || -1,
-                        currency: parseInt(currency) || 1,
-                        amount: parseFloat(amount) || 0
+                        fromAccountNo: parseInt(fromAccountNo, 10) || -1,
+                        toAccountNo: parseInt(toAccountNo, 10) || -1,
+                        currency: parseInt(currency, 10) || 1,
+                        amount: parseFloat(amount) || 0,
                     });
                     console.log('\nTransfer successful!\n', reply);
                 } catch (err) {

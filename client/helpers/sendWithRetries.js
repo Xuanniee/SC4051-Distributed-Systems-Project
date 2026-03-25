@@ -1,4 +1,4 @@
-const { CLIENT_BUFFER_SIZE } = require('./constants');
+const { CLIENT_BUFFER_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_RETRIES } = require('./constants');
 const { STATUS_CODE } = require('./constants');
 const { BufferReader } = require('../protocols/marshaller');
 
@@ -20,7 +20,7 @@ function isNormalResponse(msg) {
     }
 }
 
-module.exports = function socketSend(socket, packet, timeoutMs = 5000) {
+function socketSend(socket, packet, timeoutMs) {
     return new Promise((resolve, reject) => {
         let settled = false; // Checks if this request has already been completed
 
@@ -60,7 +60,7 @@ module.exports = function socketSend(socket, packet, timeoutMs = 5000) {
             reject(new Error('Request timeout'));
         }, timeoutMs);
 
-        socket.on('message', onMessage);
+        socket.once('message', onMessage);
 
         socket.send(packet, serverPort, serverHost, (err) => {
             if (err) {
@@ -73,4 +73,29 @@ module.exports = function socketSend(socket, packet, timeoutMs = 5000) {
             }
         });
     });
+}
+
+module.exports = async function sendWithRetries(socket, packet, {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxRetries = DEFAULT_RETRIES,
+} = {}) {
+    let lastError;
+    let currentTimeoutMs = timeoutMs;
+
+    for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+        try {
+            return await socketSend(socket, packet, currentTimeoutMs);
+        } catch (err) {
+            lastError = err;
+
+            // Retries are timeout-driven; non-timeout errors should fail fast.
+            if (!String(err.message).includes('Request timeout')) {
+                throw err;
+            }
+
+            currentTimeoutMs = Math.min(currentTimeoutMs * 2, 30000);
+        }
+    }
+
+    throw new Error(`Failed after ${maxRetries} attempts: ${lastError.message}`);
 }
