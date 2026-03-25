@@ -10,6 +10,7 @@ const { getArgs } = require('./helpers');
 async function client() {
     const socket = dgram.createSocket('udp4');
     let isMonitoring = false;
+    let monitorExpiryTimer = null;
     const { timeoutMs, monitorDurationSeconds, maxRetries } = getArgs();
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
@@ -121,6 +122,14 @@ async function client() {
                     monitorCallback(socket);
                     isMonitoring = true;
 
+                    if (monitorExpiryTimer) {
+                        clearTimeout(monitorExpiryTimer);
+                    }
+                    monitorExpiryTimer = setTimeout(() => {
+                        isMonitoring = false;
+                        monitorExpiryTimer = null;
+                    }, parsedDurationSecs * 1000);
+
                     const reply = await BankServices.monitor(
                         { socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries },
                         parsedDurationSecs,
@@ -170,6 +179,9 @@ async function client() {
                 break;
             case '8':
                 console.log('Exiting...');
+                if (monitorExpiryTimer) {
+                    clearTimeout(monitorExpiryTimer);
+                }
                 rl.close();
                 socket.close();
                 process.exit(0);
