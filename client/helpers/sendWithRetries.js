@@ -88,7 +88,6 @@ module.exports = async function sendWithRetries(socket, packet, {
         } catch (err) {
             lastError = err;
 
-            // Retries are timeout-driven; non-timeout errors should fail fast.
             if (!String(err.message).includes('Request timeout')) {
                 throw err;
             }
