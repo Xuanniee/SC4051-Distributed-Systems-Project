@@ -1,3 +1,5 @@
 __pycache__/
 *.py[cod]
 .env
+client/client-file-structure.md
+server/server_file_structure.md
