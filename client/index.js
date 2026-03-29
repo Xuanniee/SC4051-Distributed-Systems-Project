@@ -126,6 +126,10 @@ async function client() {
                         parsedDurationSecs,
                     );
                     console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully! (CTRL + C to exit)\n`, reply);
+
+                    await new Promise((resolve) => setTimeout(resolve, parsedDurationSecs * 1000));
+                    isMonitoring = false;
+                    console.log('\nMonitoring expired. Returning to main menu.\n');
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                     isMonitoring = false;
