@@ -4,7 +4,12 @@ const { encodeBalanceInquiryRequest, decodeBalanceInquiryResponse } = require('.
 
 module.exports = async function balanceInquiry({ socket, clientId, requestId, timeoutMs, maxRetries },
     { name, accountNo, password }) {
-    if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
+    if (isNaN(accountNo)) {
+        throw new Error('Account number must be a valid number');
+    }
+    accountNo = parseInt(accountNo) || -1;
+
+    if (!accountNo || isNaN(accountNo) || accountNo < 1000 || !name || !password || password.length !== 8) {
         throw new Error('Invalid account details');
     }
 

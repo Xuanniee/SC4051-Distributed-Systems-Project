@@ -4,6 +4,13 @@ const { encodeWithdrawDepositRequest, decodeWithdrawDepositResponse } = require(
 
 module.exports = async function withdraw({ socket, clientId, requestId, timeoutMs, maxRetries },
     { name, accountNo, password, currency = 1, amount = 0 }) {
+    if (isNaN(currency) || isNaN(amount) || isNaN(accountNo)) {
+        throw new Error('Currency, amount, and account number must be valid numbers');
+    }
+    currency = parseInt(currency) || 1;
+    amount = parseFloat(amount) || 0;
+    accountNo = parseInt(accountNo) || -1;
+
     if (!accountNo || accountNo < 1000 || !name || !password || password.length !== 8) {
         throw new Error('Invalid account details');
     }

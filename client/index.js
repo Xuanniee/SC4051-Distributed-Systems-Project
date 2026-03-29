@@ -10,7 +10,6 @@ const { getArgs } = require('./helpers');
 async function client() {
     const socket = dgram.createSocket('udp4');
     let isMonitoring = false;
-    let monitorExpiryTimer = null;
     const { timeoutMs, monitorDurationSeconds, maxRetries } = getArgs();
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
@@ -48,8 +47,8 @@ async function client() {
                     const reply = await BankServices.openAccount({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        initialBalance: parseFloat(initialBalance) || 0,
-                        currency: parseInt(currency, 10) || 1,
+                        initialBalance,
+                        currency,
                     });
                     console.log(`${reply.message}\n`, reply);
                 } catch (err) {
@@ -64,7 +63,7 @@ async function client() {
                     const reply = await BankServices.closeAccount({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo, 10) || -1,
+                        accountNo,
                     });
                     console.log(`${reply.message}\n`, reply);
                 } catch (err) {
@@ -81,9 +80,9 @@ async function client() {
                     const reply = await BankServices.deposit({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo, 10) || -1,
-                        currency: parseInt(currency, 10) || 1,
-                        amount: parseFloat(amount) || 0,
+                        accountNo,
+                        currency,
+                        amount
                     });
                     console.log(`${reply.message}\n`, reply);
                 } catch (err) {
@@ -100,9 +99,9 @@ async function client() {
                     const reply = await BankServices.withdraw({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo, 10) || -1,
-                        currency: parseInt(currency, 10) || 1,
-                        amount: parseFloat(amount) || 0,
+                        accountNo,
+                        currency,
+                        amount,
                     });
                     console.log(`${reply.message}\n`, reply);
                 } catch (err) {
@@ -117,18 +116,13 @@ async function client() {
                     }
 
                     const durationSecs = await rl.question(`Enter monitoring duration in seconds (default ${monitorDurationSeconds}): `);
+                    if (isNaN(durationSecs) || parseInt(durationSecs) <= 0) {
+                        throw new Error('Monitoring duration must be a positive integer');
+                    }
                     const parsedDurationSecs = parseInt(durationSecs) || monitorDurationSeconds;
 
                     monitorCallback(socket);
                     isMonitoring = true;
-
-                    if (monitorExpiryTimer) {
-                        clearTimeout(monitorExpiryTimer);
-                    }
-                    monitorExpiryTimer = setTimeout(() => {
-                        isMonitoring = false;
-                        monitorExpiryTimer = null;
-                    }, parsedDurationSecs * 1000);
 
                     const reply = await BankServices.monitor(
                         { socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries },
@@ -156,7 +150,7 @@ async function client() {
                     const reply = await BankServices.balanceInquiry({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         name,
                         password,
-                        accountNo: parseInt(accountNo, 10) || -1,
+                        accountNo,
                     });
                     if (reply.statusCode === STATUS_CODE.ERROR) {
                         throw reply;
@@ -178,10 +172,10 @@ async function client() {
                     const reply = await BankServices.transfer({ socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries }, {
                         fromName,
                         password,
-                        fromAccountNo: parseInt(fromAccountNo, 10) || -1,
-                        toAccountNo: parseInt(toAccountNo, 10) || -1,
-                        currency: parseInt(currency, 10) || 1,
-                        amount: parseFloat(amount) || 0,
+                        fromAccountNo,
+                        toAccountNo,
+                        currency,
+                        amount,
                     });
                     console.log(`${reply.message}\n`, reply);
                 } catch (err) {
@@ -190,9 +184,6 @@ async function client() {
                 break;
             case '8':
                 console.log('Exiting...');
-                if (monitorExpiryTimer) {
-                    clearTimeout(monitorExpiryTimer);
-                }
                 rl.close();
                 socket.close();
                 process.exit(0);

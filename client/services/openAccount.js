@@ -4,6 +4,12 @@ const { encodeOpenAccountRequest, decodeOpenAccountResponse } = require("../prot
 
 async function openAccount({ socket, clientId, requestId, timeoutMs, maxRetries },
     { name, password, initialBalance = 0, currency = 1 }) {
+    if (isNaN(initialBalance) || isNaN(currency)) {
+        throw new Error('Initial balance and currency must be valid numbers');
+    }
+    initialBalance = parseFloat(initialBalance) || 0;
+    currency = parseInt(currency) || 1;
+
     if (!name || !password || password.length !== 8) {
         throw new Error('Please enter a name and password with exactly 8 characters');
     }

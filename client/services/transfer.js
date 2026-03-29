@@ -4,6 +4,14 @@ const { encodeTransferRequest, decodeTransferResponse } = require('../protocols/
 
 module.exports = async function transfer({ socket, clientId, requestId, timeoutMs, maxRetries },
     { fromName, fromAccountNo, password, toAccountNo, currency = 1, amount = 0 }) {
+    if (isNaN(currency) || isNaN(amount) || isNaN(fromAccountNo) || isNaN(toAccountNo)) {
+        throw new Error('Currency, amount, and account numbers must be valid numbers');
+    }
+    currency = parseInt(currency) || 1;
+    amount = parseFloat(amount) || 0;
+    fromAccountNo = parseInt(fromAccountNo) || -1;
+    toAccountNo = parseInt(toAccountNo) || -1;
+
     if (!fromAccountNo || fromAccountNo < 1000 || !fromName || !password || password.length !== 8) {
         throw new Error('Invalid account details');
     }
