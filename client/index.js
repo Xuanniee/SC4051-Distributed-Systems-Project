@@ -153,11 +153,10 @@ async function client() {
                         password,
                         accountNo: parseInt(accountNo, 10) || -1,
                     });
-                    if (reply.statusCode !== STATUS_CODE.ERROR) {
-                        console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`);
-                    } else {
+                    if (reply.statusCode === STATUS_CODE.ERROR) {
                         throw reply;
                     }
+                    console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
