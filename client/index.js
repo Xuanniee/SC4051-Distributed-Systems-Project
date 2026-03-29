@@ -1,7 +1,7 @@
 const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
-const { OP_CODE, CURRENCY, STATUS_CODE } = require('./helpers/constants');
+const { OP_CODE, CURRENCY } = require('./helpers/constants');
 const BankServices = require('./services');
 const dgram = require('node:dgram');
 const monitorCallback = require('./protocols/monitorCallback');
@@ -10,7 +10,6 @@ const { getArgs } = require('./helpers');
 async function client() {
     const socket = dgram.createSocket('udp4');
     let isMonitoring = false;
-    let monitorExpiryTimer = null;
     const { timeoutMs, monitorDurationSeconds, maxRetries } = getArgs();
 
     const clientId = generateClientId(process.env.CLIENT_NODE_ID || 'client');
@@ -51,7 +50,7 @@ async function client() {
                         initialBalance: parseFloat(initialBalance) || 0,
                         currency: parseInt(currency, 10) || 1,
                     });
-                    console.log(`${reply.message}\n`, reply);
+                    console.log('\nAccount opened successfully!\n', reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -66,7 +65,7 @@ async function client() {
                         password,
                         accountNo: parseInt(accountNo, 10) || -1,
                     });
-                    console.log(`${reply.message}\n`, reply);
+                    console.log('\nAccount closed successfully!\n', reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -85,7 +84,7 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log(`${reply.message}\n`, reply);
+                    console.log('\nDeposit successful!\n', reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -104,7 +103,7 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log(`${reply.message}\n`, reply);
+                    console.log('\nWithdrawal successful!\n', reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -122,21 +121,10 @@ async function client() {
                     monitorCallback(socket);
                     isMonitoring = true;
 
-                    if (monitorExpiryTimer) {
-                        clearTimeout(monitorExpiryTimer);
-                    }
-                    monitorExpiryTimer = setTimeout(() => {
-                        isMonitoring = false;
-                        monitorExpiryTimer = null;
-                    }, parsedDurationSecs * 1000);
-
                     const reply = await BankServices.monitor(
                         { socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries },
                         parsedDurationSecs,
                     );
-                    if (reply.statusCode === STATUS_CODE.ERROR) {
-                        throw reply;
-                    }
                     console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully! (CTRL + C to exit)\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
@@ -153,10 +141,7 @@ async function client() {
                         password,
                         accountNo: parseInt(accountNo, 10) || -1,
                     });
-                    if (reply.statusCode === STATUS_CODE.ERROR) {
-                        throw reply;
-                    }
-                    console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`);
+                    console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -178,16 +163,13 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log(`${reply.message}\n`, reply);
+                    console.log('\nTransfer successful!\n', reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
                 break;
             case '8':
                 console.log('Exiting...');
-                if (monitorExpiryTimer) {
-                    clearTimeout(monitorExpiryTimer);
-                }
                 rl.close();
                 socket.close();
                 process.exit(0);
