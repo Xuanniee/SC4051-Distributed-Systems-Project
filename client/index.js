@@ -1,7 +1,7 @@
 const { generateClientId, createRequestIdGenerator } = require('./helpers');
 const readline = require('node:readline/promises');
 const { stdin: input, stdout: output } = require('node:process');
-const { OP_CODE, CURRENCY } = require('./helpers/constants');
+const { OP_CODE, CURRENCY, STATUS_CODE } = require('./helpers/constants');
 const BankServices = require('./services');
 const dgram = require('node:dgram');
 const monitorCallback = require('./protocols/monitorCallback');
@@ -51,7 +51,7 @@ async function client() {
                         initialBalance: parseFloat(initialBalance) || 0,
                         currency: parseInt(currency, 10) || 1,
                     });
-                    console.log('\nAccount opened successfully!\n', reply);
+                    console.log(`${reply.message}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -66,7 +66,7 @@ async function client() {
                         password,
                         accountNo: parseInt(accountNo, 10) || -1,
                     });
-                    console.log('\nAccount closed successfully!\n', reply);
+                    console.log(`${reply.message}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -85,7 +85,7 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log('\nDeposit successful!\n', reply);
+                    console.log(`${reply.message}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -104,7 +104,7 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log('\nWithdrawal successful!\n', reply);
+                    console.log(`${reply.message}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -134,6 +134,9 @@ async function client() {
                         { socket, clientId, requestId: nextRequestId(), timeoutMs, maxRetries },
                         parsedDurationSecs,
                     );
+                    if (reply.statusCode === STATUS_CODE.ERROR) {
+                        throw reply;
+                    }
                     console.log(`\nMonitoring for ${parsedDurationSecs} seconds started successfully! (CTRL + C to exit)\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
@@ -150,7 +153,11 @@ async function client() {
                         password,
                         accountNo: parseInt(accountNo, 10) || -1,
                     });
-                    console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`, reply);
+                    if (reply.statusCode !== STATUS_CODE.ERROR) {
+                        console.log(`\nYour balance: (${reply.currency || CURRENCY.SGD}) $${reply.balance || 0}\n`);
+                    } else {
+                        throw reply;
+                    }
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
@@ -172,7 +179,7 @@ async function client() {
                         currency: parseInt(currency, 10) || 1,
                         amount: parseFloat(amount) || 0,
                     });
-                    console.log('\nTransfer successful!\n', reply);
+                    console.log(`${reply.message}\n`, reply);
                 } catch (err) {
                     console.error(`\nError: ${err.message}`);
                 }
