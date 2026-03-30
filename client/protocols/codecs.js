@@ -136,7 +136,8 @@ module.exports = {
         const eventName = reader.readString();
         const accountNo = reader.readU32();
         const ownerName = reader.readString();
-        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === reader.readU8());
+        const currencyVal = reader.readU8();
+        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
         const balance = reader.readF64();
         const note = reader.readString();
 
