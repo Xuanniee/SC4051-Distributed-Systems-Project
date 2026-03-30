@@ -64,9 +64,10 @@ module.exports = {
 
         const accountNo = reader.readU32();
         const newBalance = reader.readF64();
-        const currency = reader.readU8();
+        const currencyVal = reader.readU8();
+        const currency = Object.keys(CURRENCY).find(key => CURRENCY[key] === currencyVal);
 
-        return { statusCode, status, message, accountNo, balance: newBalance, currency };
+        return { statusCode, status, message, accountNo, balance: newBalance, currency: currencyVal };
     },
     encodeBalanceInquiryRequest: ({ name, accountNo, password }) => {
         const writer = new BufferWriter();
