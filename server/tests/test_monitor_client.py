@@ -30,7 +30,7 @@ def main() -> None:
     client_socket.bind(("127.0.0.1", 9001))
     
     # Send a monitor Request to the Backend server to monitor for 5 mins
-    request = MonitorRequest(duration_seconds=300)
+    request = MonitorRequest(duration_seconds=2500)
     client_id = "monitor-client"
     request_id = 1
     header = encode_invocation_header(client_id, request_id)
@@ -52,6 +52,8 @@ def main() -> None:
         print("Received callback from server:")
         print(update)
         print()
+    
+    # TODO Implement Turn off the binding of client socket so client knows its dont have to listen
 
 if __name__ == "__main__":
     main()

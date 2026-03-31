@@ -69,7 +69,7 @@ class MonitorService:
         """
         Update every client that is active monitoring
         """
-        # Remove any expired monitors so we don not errorneous udpate
+        # Remove any expired monitors so we don't not errorneous udpate
         self.remove_expired_monitors()
 
         # Encode the banking acc details callabck

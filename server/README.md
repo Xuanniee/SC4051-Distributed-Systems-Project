@@ -62,3 +62,10 @@ python -m tests.test_bank_services
 python -m tests.test_at_most_once
 python -m tests.test_transfer
 ```
+
+## Server
+
+1. Drop-Reply-Rate: Server sent reply so monitor client will see it, but client who make request wont
+2. Drop-Request-Rate: Server never received the request, so the monitor client will not receive anything
+3. Timeout: Specify the number of seconds for the server to sleep to force the client to timeout and retransmit a request
+4. Semantics: Which semantics to use. Either at most once or at least once

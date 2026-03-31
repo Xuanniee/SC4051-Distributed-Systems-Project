@@ -34,8 +34,10 @@ class BankingHandlers:
             response = self.bank_service.open_account(request)
 
             if isinstance(response, OpenAccountResponse):
+                print(f"OpenAcc Res: ", response)
                 return encode_open_account_response(response)
-
+            
+            print(f"OpenAcc Res: ", response)
             return encode_standard_response(response)
 
         except Exception as exc:
@@ -55,9 +57,11 @@ class BankingHandlers:
         try:
             request = parse_request(OpCode.CLOSE_ACCOUNT, payload)
             response = self.bank_service.close_account(request)
+            print(f"CloseAcc Res: ", response)
             return encode_standard_response(response)
 
         except Exception as exc:
+            print(f"CloseAcc Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
@@ -84,9 +88,11 @@ class BankingHandlers:
                 message=f"Monitoring registered for {request.duration_seconds} seconds",
             )
 
+            print(f"Monitor Res: ", response)
             return encode_standard_response(response)
 
         except Exception as exc:
+            print(f"Monitor Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
@@ -105,11 +111,14 @@ class BankingHandlers:
             response = self.bank_service.withdraw(request)
 
             if isinstance(response, BalanceResponse):
+                print(f"Withdraw Res: ", response)
                 return encode_balance_response(response)
 
+            print(f"Withdraw Res: ", response)
             return encode_standard_response(response)
 
         except Exception as exc:
+            print(f"Withdraw Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
@@ -128,11 +137,14 @@ class BankingHandlers:
             response = self.bank_service.deposit(request)
 
             if isinstance(response, BalanceResponse):
+                print(f"Deposit Res: ", response)
                 return encode_balance_response(response)
 
+            print(f"Deposit Res: ", response)
             return encode_standard_response(response)
 
         except Exception as exc:
+            print(f"Deposit Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
@@ -150,10 +162,13 @@ class BankingHandlers:
             request = parse_request(OpCode.BALANCE_INQUIRY, payload)
             response = self.bank_service.check_balance(request)
             if isinstance(response, BalanceResponse):
+                print(f"Balance Res: ", response)
                 return encode_balance_response(response)
 
+            print(f"Deposit Res: ", response)
             return encode_standard_response(response)
         except Exception as exc:
+            print(f"Deposit Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
@@ -170,11 +185,14 @@ class BankingHandlers:
 
             # Transfer will return a check balance functionality
             if isinstance(response, BalanceResponse):
+                print(f"Transfer Res: ", response)
                 return encode_balance_response(response)
 
+            print(f"Transfer Res: ", response)
             return encode_standard_response(response)
         
         except Exception as exc:
+            print(f"Transfer Res: ", response)
             return encode_standard_response(
                 StandardResponse(
                     status=StatusCode.ERROR,
